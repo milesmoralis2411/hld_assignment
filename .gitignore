@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Data / DB artifacts (regenerated on first run)
+data/typeahead.db
+data/typeahead.db-wal
+data/typeahead.db-shm
+data/queries.csv
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.log

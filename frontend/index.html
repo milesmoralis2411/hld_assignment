@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Typeahead</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>🔎 Search Typeahead</h1>
+      <p class="subtitle">Type to see live suggestions · backed by a Trie, a
+        consistent-hashed distributed cache, recency-aware trending and batched writes.</p>
+    </header>
+
+    <main class="layout">
+      <section class="search-col">
+        <div class="ranking-toggle">
+          <span>Ranking:</span>
+          <label><input type="radio" name="ranking" value="count" checked /> Popularity (basic)</label>
+          <label><input type="radio" name="ranking" value="recent" /> Recency-aware (enhanced)</label>
+        </div>
+
+        <div class="search-wrap">
+          <input id="search" type="text" autocomplete="off" spellcheck="false"
+                 placeholder="Search for anything… (try 'iphone', 'best', 'python')" />
+          <button id="search-btn">Search</button>
+          <ul id="suggestions" class="suggestions hidden"></ul>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="result" class="result hidden">
+          <h3>Search response</h3>
+          <pre id="result-body"></pre>
+        </div>
+
+        <div class="trending card">
+          <div class="card-head">
+            <h2>🔥 Trending now</h2>
+            <button id="refresh-trending" class="ghost">refresh</button>
+          </div>
+          <ol id="trending" class="trending-list"><li class="muted">loading…</li></ol>
+        </div>
+      </section>
+
+      <aside class="stats-col">
+        <div class="card">
+          <div class="card-head"><h2>📊 Live metrics</h2>
+            <button id="refresh-metrics" class="ghost">refresh</button></div>
+          <div class="metric"><span>Suggest p95 latency</span><b id="m-p95">–</b></div>
+          <div class="metric"><span>Suggest p50 latency</span><b id="m-p50">–</b></div>
+          <div class="metric"><span>Cache hit rate</span><b id="m-hit">–</b></div>
+          <div class="metric"><span>Cache hits / misses</span><b id="m-hm">–</b></div>
+          <div class="metric"><span>DB reads / writes</span><b id="m-db">–</b></div>
+          <div class="metric"><span>Raw submissions</span><b id="m-sub">–</b></div>
+          <div class="metric"><span>Write reduction</span><b id="m-wr">–</b></div>
+          <div class="metric"><span>Index words / nodes</span><b id="m-idx">–</b></div>
+        </div>
+
+        <div class="card">
+          <h2>🧭 Cache routing</h2>
+          <p class="hint">Which logical cache node owns the prefix you're typing
+            (consistent hashing).</p>
+          <div class="metric"><span>Prefix key</span><b id="r-key">–</b></div>
+          <div class="metric"><span>Owner node</span><b id="r-node">–</b></div>
+          <div class="metric"><span>Status</span><b id="r-status">–</b></div>
+          <div class="metric"><span>Ring points</span><b id="r-ring">–</b></div>
+        </div>
+      </aside>
+    </main>
+    <footer class="foot">Search Typeahead Assignment · <a href="/docs">API docs</a> ·
+      <a href="/metrics">/metrics</a></footer>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

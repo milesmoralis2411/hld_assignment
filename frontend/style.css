@@ -1,0 +1,105 @@
+:root {
+  --bg: #0f1226;
+  --panel: #1a1f3a;
+  --panel-2: #232a4d;
+  --text: #e7eaf6;
+  --muted: #9aa3c7;
+  --accent: #6c7bff;
+  --accent-2: #38d39f;
+  --danger: #ff6b6b;
+  --border: #2c335c;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  background: radial-gradient(1200px 600px at 70% -10%, #20264f 0%, var(--bg) 55%);
+  color: var(--text);
+  min-height: 100vh;
+}
+.page { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+
+.hero h1 { font-size: 2rem; margin: 0 0 6px; }
+.subtitle { color: var(--muted); margin: 0 0 24px; max-width: 760px; }
+
+.layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 22px; align-items: start; }
+@media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
+
+.ranking-toggle {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  color: var(--muted); margin-bottom: 12px; font-size: .9rem;
+}
+.ranking-toggle label { color: var(--text); cursor: pointer; }
+
+.search-wrap { position: relative; display: flex; gap: 10px; }
+#search {
+  flex: 1; padding: 16px 18px; font-size: 1.1rem; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  outline: none; transition: border .15s, box-shadow .15s;
+}
+#search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,123,255,.25); }
+#search-btn {
+  padding: 0 22px; border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), #8a79ff); color: white;
+  font-weight: 600; font-size: 1rem;
+}
+#search-btn:hover { filter: brightness(1.08); }
+
+.suggestions {
+  position: absolute; top: 64px; left: 0; right: 96px; z-index: 20;
+  list-style: none; margin: 0; padding: 6px; background: var(--panel);
+  border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+  max-height: 380px; overflow-y: auto;
+}
+.suggestions li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer; gap: 12px;
+}
+.suggestions li:hover, .suggestions li.active { background: var(--panel-2); }
+.suggestions .q { font-weight: 500; }
+.suggestions .q mark { background: transparent; color: var(--accent-2); font-weight: 700; }
+.suggestions .meta { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+
+.status { min-height: 22px; margin: 10px 2px; font-size: .88rem; color: var(--muted); }
+.status.error { color: var(--danger); }
+.status.loading::after { content: "⏳ loading…"; }
+
+.result { margin-top: 8px; }
+.result pre {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; color: var(--accent-2); overflow-x: auto; margin: 6px 0 0;
+}
+
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px 18px; margin-top: 18px; box-shadow: var(--shadow);
+}
+.card-head { display: flex; justify-content: space-between; align-items: center; }
+.card h2 { font-size: 1.05rem; margin: 0 0 10px; }
+.hint { color: var(--muted); font-size: .8rem; margin: 0 0 10px; }
+
+.ghost {
+  background: transparent; border: 1px solid var(--border); color: var(--muted);
+  border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: .8rem;
+}
+.ghost:hover { color: var(--text); border-color: var(--accent); }
+
+.trending-list { margin: 0; padding-left: 22px; }
+.trending-list li { padding: 6px 0; cursor: pointer; }
+.trending-list li:hover { color: var(--accent-2); }
+.trending-list .score { color: var(--muted); font-size: .8rem; margin-left: 8px; }
+
+.metric {
+  display: flex; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px dashed var(--border); font-size: .9rem;
+}
+.metric:last-child { border-bottom: none; }
+.metric span { color: var(--muted); }
+.metric b { color: var(--text); }
+
+.muted { color: var(--muted); }
+.hidden { display: none; }
+.foot { margin-top: 30px; color: var(--muted); font-size: .82rem; text-align: center; }
+.foot a { color: var(--accent); text-decoration: none; }
