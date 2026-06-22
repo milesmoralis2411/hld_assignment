@@ -53,6 +53,41 @@ hit rate, DB read/write counts and the batch write‑reduction percentage. See
 
 ---
 
+## 📸 Screenshots
+
+**Typeahead suggestions** — prefix‑matched, count‑sorted, debounced as you type.
+
+![Typeahead suggestions](images/typehead.png)
+
+**Search submission** — the dummy search API returns `{"message": "Searched"}` and
+the query's popularity is updated.
+
+![Search response](images/search-response.png)
+
+**Basic vs recency‑aware ranking** — same prefix, two ranking modes. In the
+enhanced mode a recently searched query is boosted to the top (and the boost
+decays over time, so spikes don't stay over‑ranked).
+
+![Basic ranking by popularity](images/ranking-basic.png)
+
+![Recency‑aware ranking](images/ranking-recency.png)
+
+**Trending searches** — the most active queries right now via a time‑decayed counter.
+
+![Trending searches](images/trending.png)
+
+**Live metrics** — suggestion p95 latency, ~99% cache hit rate, and ~98% write
+reduction from batching.
+
+![Live metrics](images/metrics.png)
+
+**Cache routing (consistent hashing)** — which logical cache node owns the
+current prefix key.
+
+![Cache routing via consistent hashing](images/cache-routing.png)
+
+---
+
 ## 2. Architecture
 
 ```
@@ -279,6 +314,7 @@ app/         backend (FastAPI + data-system components)
 frontend/    static UI (HTML/CSS/JS)
 scripts/     dataset generator, loader, benchmark
 docs/        architecture + performance report
+images/      UI screenshots (used in this README)
 data/        generated dataset + SQLite db (gitignored)
 run.py       entry point
 ```
