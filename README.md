@@ -56,34 +56,49 @@ hit rate, DB read/write counts and the batch write‑reduction percentage. See
 
 ## 📸 Screenshots
 
-**Typeahead suggestions** — prefix‑matched, count‑sorted, debounced as you type.
+All screenshots are from the app running locally on the **real 333,333‑keyword
+dataset** (Google Web Trillion Word Corpus; the live‑metrics panel reads
+`index words / nodes = 333,344 / 806,009`).
 
-![Typeahead suggestions](images/typehead.png)
+**Typeahead suggestions.** Typing `iph` returns prefix‑matched, count‑sorted
+completions, debounced as you type. The right‑hand panels show the live metrics
+and the cache routing for the current prefix key `count:iph` → owner `cache-3`,
+status `HIT`.
 
-**Search submission** — the dummy search API returns `{"message": "Searched"}` and
-the query's popularity is updated.
+![Typeahead suggestions](images/typeahead.png)
 
-![Search response](images/search-response.png)
+**Search submission.** Submitting a query (Enter / Search button) hits the dummy
+search API, which returns `{"message": "Searched", "query": "iphone 15"}` and
+counts the query toward popularity and trending.
 
-**Basic vs recency‑aware ranking** — same prefix, two ranking modes. In the
-enhanced mode a recently searched query is boosted to the top (and the boost
-decays over time, so spikes don't stay over‑ranked).
+![Search submission response](images/search-response.png)
+
+**Basic ranking (by popularity).** For the prefix `lap`, suggestions are ordered
+purely by overall corpus count (`laptop`, `laptops`, `lap`, `laps`, `lapse`, …).
 
 ![Basic ranking by popularity](images/ranking-basic.png)
 
-![Recency‑aware ranking](images/ranking-recency.png)
+**Recency‑aware ranking (enhanced).** Same prefix `lap`, but after repeatedly
+searching `lapse` it jumps to **#1** — even though its count (~1.46 M) is far
+below `laptop` (~31.8 M) — because the recency boost (`log1p(count) +
+recency_weight·recency`) lifts it. The boost decays over time, so the spike
+doesn't stay over‑ranked.
 
-**Trending searches** — the most active queries right now via a time‑decayed counter.
+![Recency-aware ranking](images/ranking-recency.png)
+
+**Trending searches.** The 🔥 *Trending now* section lists the most active
+queries right now, ranked by the time‑decayed recency counter.
 
 ![Trending searches](images/trending.png)
 
-**Live metrics** — suggestion p95 latency, ~99% cache hit rate, and ~98% write
-reduction from batching.
+**Live metrics.** Suggestion **p95 ≈ 0.06 ms**, **99% cache hit rate**, DB
+reads/writes, and **~96% write reduction** from batching — plus the index size.
 
 ![Live metrics](images/metrics.png)
 
-**Cache routing (consistent hashing)** — which logical cache node owns the
-current prefix key.
+**Cache routing (consistent hashing).** Which logical cache node owns the current
+prefix key — here `recent:lap` → owner `cache-0`, status `HIT`, over a 600‑point
+hash ring (4 nodes × 150 virtual nodes).
 
 ![Cache routing via consistent hashing](images/cache-routing.png)
 
