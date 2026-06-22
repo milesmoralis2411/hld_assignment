@@ -94,9 +94,9 @@ sequenceDiagram
   participant S as SuggestionService
   participant TR as TrendingTracker
   participant B as BatchWriter
-  U->>S: POST /search {"query":"iphone 15"}
-  S->>TR: record("iphone 15")   %% recency updates instantly
-  S->>B: add("iphone 15")       %% count write is buffered
+  U->>S: POST /search {"query":"python"}
+  S->>TR: record("python")      %% recency updates instantly
+  S->>B: add("python")          %% count write is buffered
   S-->>U: {"message":"Searched"}
 ```
 

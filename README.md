@@ -16,6 +16,21 @@ a benchmark harness, and full docs.
 
 ---
 
+## ✅ Submission checklist (assignment §12)
+
+| Expected submission item | Where it is |
+|---|---|
+| GitHub repository / source‑code submission | this repository |
+| README with setup instructions | §1 Quick start (below) |
+| Dataset **source** and **loading instructions** | §4 Dataset (below) |
+| Architecture diagram / clear explanation | §2 Architecture + [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| API documentation | §3 API documentation + interactive `/docs` |
+| Screenshots / short demo | 📸 Screenshots (below) |
+| Performance report (latency, cache hit rate, write reduction via batching) | [docs/PERFORMANCE.md](docs/PERFORMANCE.md) |
+| Explanation of design choices and trade‑offs | §5 Design choices & trade‑offs (below) |
+
+---
+
 ## 1. Quick start
 
 > Requires **Python 3.9+**. Everything runs locally; no external services.
@@ -190,24 +205,25 @@ Up to 10 suggestions whose query **starts with** `<prefix>`.
 {
   "prefix": "iph", "ranking": "count", "source": "store",
   "suggestions": [
-    {"query": "iphone", "count": 100000},
-    {"query": "iphone 15", "count": 85000},
-    {"query": "iphone charger", "count": 60000}
+    {"query": "iphoto", "count": 608838},
+    {"query": "iph", "count": 97233},
+    {"query": "iphigenia", "count": 55967},
+    {"query": "iphone", "count": 50988}
   ]
 }
 ```
 `source` is `cache` (hit), `store` (miss → computed) or `empty`.
 
-### `POST /search`  body `{"query": "iphone 15"}`
+### `POST /search`  body `{"query": "python"}`
 Dummy search. Records recency now, buffers the count increment.
 ```jsonc
-{"message": "Searched", "query": "iphone 15"}
+{"message": "Searched", "query": "python"}
 ```
 
 ### `GET /trending`
 Currently trending queries (recency‑aware).
 ```jsonc
-{"trending": [{"query": "iphone 15", "recency_score": 4.87, "count": 85003}]}
+{"trending": [{"query": "python", "recency_score": 12.5, "count": 17610578}]}
 ```
 
 ### `GET /cache/debug?prefix=<p>&ranking=count|recent`
@@ -215,7 +231,7 @@ Shows **which cache node owns** the prefix key and whether it's a hit/miss —
 i.e. the consistent‑hashing routing decision.
 ```jsonc
 {
-  "key": "count:iph", "key_hash": 27893…, "owner_node": "cache-2",
+  "key": "count:iph", "key_hash": 27893…, "owner_node": "cache-3",
   "cache_status": "HIT", "total_nodes": 4, "virtual_nodes_per_node": 150,
   "total_points_on_ring": 600
 }
