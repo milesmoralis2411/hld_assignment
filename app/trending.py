@@ -13,9 +13,10 @@ This is an exponentially time-decayed counter. Key properties:
   buffers (we lazily decay on read/write using timestamps).
 
 The enhanced suggestion ranking blends durable popularity (count, from the
-store/Trie) with this recency score:
+store/Trie) with this recency score. The count is log-compressed so the recency
+term stays meaningful regardless of the dataset's absolute count scale:
 
-    final = count + recency_weight * recent_score(query)
+    final = log1p(count) + recency_weight * recent_score(query)
 
 Trade-offs are documented in docs/PERFORMANCE.md and the README.
 """

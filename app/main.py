@@ -55,7 +55,8 @@ async def _flush_loop(service: SuggestionService, stop: asyncio.Event) -> None:
 async def lifespan(app: FastAPI):
     t0 = time.time()
     # 1) dataset + primary store
-    ensure_dataset(config.dataset_path, config.dataset_size)
+    ensure_dataset(config.dataset_path, config.dataset_url,
+                   config.dataset_limit, config.dataset_size)
     store = PrimaryStore(config.db_path)
     if store.is_empty():
         n = load_into_store(store, config.dataset_path)

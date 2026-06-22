@@ -140,7 +140,7 @@ reports the ratio.
 
 - **Basic (`ranking=count`)** — order matching completions by overall `count`.
   Historically popular queries rank first. (Covers the 60% baseline.)
-- **Enhanced (`ranking=recent`)** — `final = count + recency_weight · recency`,
+- **Enhanced (`ranking=recent`)** — `final = log1p(count) + recency_weight · recency`,
   where `recency` is the exponentially decayed counter from `TrendingTracker`.
   Recently surging queries rise; because the recency term **decays**, a brief
   spike does not stay over‑ranked forever. (Covers the +20%.)
@@ -152,7 +152,7 @@ recency decays.
 
 ## 8. Mapping to the suggested milestones
 
-1. **Load dataset + basic suggestion API** — `dataset.py`, `loader.py`,
+1. **Load dataset + basic suggestion API** — `download_dataset`/`loader.py`,
    `store.py`, `trie.py`, `GET /suggest`.
 2. **Frontend search box + dropdown** — `frontend/`.
 3. **Search submission + query‑count updates** — `POST /search`, `service`,

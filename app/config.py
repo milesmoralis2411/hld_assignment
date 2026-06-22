@@ -22,6 +22,14 @@ class Config:
     # ---- Storage ----
     db_path: str = os.getenv("TYPEAHEAD_DB", "data/typeahead.db")
     dataset_path: str = os.getenv("TYPEAHEAD_DATASET", "data/queries.csv")
+    # Real open dataset: Google Web Trillion Word Corpus unigrams (Peter Norvig).
+    # Real keywords with real frequency counts; fetched automatically on first run.
+    dataset_url: str = os.getenv(
+        "TYPEAHEAD_DATASET_URL", "https://norvig.com/ngrams/count_1w.txt"
+    )
+    # Cap rows loaded from the real dataset (0 = load all 333,333).
+    dataset_limit: int = _get_int("TYPEAHEAD_DATASET_LIMIT", 0)
+    # Size used only by the offline synthetic fallback generator.
     dataset_size: int = _get_int("TYPEAHEAD_DATASET_SIZE", 120_000)
 
     # ---- Suggestions ----
@@ -49,8 +57,10 @@ class Config:
     # ---- Trending / recency ----
     # Half-life of the decaying "recent activity" counter, in seconds.
     recency_half_life_seconds: float = _get_float("TYPEAHEAD_RECENCY_HALFLIFE", 300.0)
-    # Weight applied to recent activity when ranking == "recent".
-    recency_weight: float = _get_float("TYPEAHEAD_RECENCY_WEIGHT", 800.0)
+    # Weight applied to recent activity when ranking == "recent". Blended against
+    # log1p(count), so this is on a log scale (a few searches can out-rank a
+    # higher-count neighbour, then decays back).
+    recency_weight: float = _get_float("TYPEAHEAD_RECENCY_WEIGHT", 6.0)
     trending_size: int = _get_int("TYPEAHEAD_TRENDING_SIZE", 10)
 
     frontend_dir: str = os.getenv("TYPEAHEAD_FRONTEND", "frontend")

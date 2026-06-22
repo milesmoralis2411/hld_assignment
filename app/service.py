@@ -9,6 +9,7 @@ HTTP layer (main.py) thin.
 """
 from __future__ import annotations
 
+import math
 import time
 from typing import Dict, List, Tuple
 
@@ -90,7 +91,10 @@ class SuggestionService:
         scored = []
         for q, count in pool.items():
             rs = self.trending.score(q, now)
-            final = count + w * rs
+            # log-compress the popularity so the recency boost is meaningful
+            # regardless of the dataset's absolute count scale (real corpus
+            # counts run into the billions; synthetic ones are small).
+            final = math.log1p(count) + w * rs
             scored.append((final, count, rs, q))
         scored.sort(key=lambda x: (-x[0], x[3]))
         return [
