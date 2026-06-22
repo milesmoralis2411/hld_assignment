@@ -1,0 +1,12 @@
+services:
+  typeahead:
+    build: .
+    image: search-typeahead
+    container_name: search-typeahead
+    ports:
+      - "8000:8000"
+    # Persist the downloaded dataset + SQLite DB across container restarts so
+    # it isn't re-downloaded/rebuilt every time.
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

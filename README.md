@@ -40,6 +40,25 @@ First start takes ~10–15 s (it downloads the dataset, loads SQLite and builds 
 index over 333k keywords); later starts reuse `data/typeahead.db` and are ready
 in ~3–4 s.
 
+### Run with Docker (optional)
+
+The app also runs as a container — no local Python needed:
+
+```bash
+docker compose up --build          # then open http://127.0.0.1:8000
+```
+
+Or with plain Docker:
+
+```bash
+docker build -t search-typeahead .
+docker run -p 8000:8000 -v "$(pwd)/data:/app/data" search-typeahead
+```
+
+The `data/` volume persists the downloaded dataset + SQLite DB across restarts
+(so it isn't re-fetched each run). The container needs internet on first start to
+download the dataset; offline, it falls back to the synthetic generator.
+
 ### Measure performance
 
 In a second terminal (with the server running):
@@ -344,4 +363,6 @@ docs/        architecture + performance report
 images/      UI screenshots (used in this README)
 data/        downloaded dataset + SQLite db (gitignored)
 run.py       entry point
+Dockerfile   container image
+docker-compose.yml
 ```
