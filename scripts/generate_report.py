@@ -27,8 +27,8 @@ from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
-    Image, PageBreak, Paragraph, Preformatted, SimpleDocTemplate, Spacer, Table,
-    TableStyle,
+    CondPageBreak, HRFlowable, Image, KeepTogether, PageBreak, Paragraph,
+    Preformatted, SimpleDocTemplate, Spacer, Table, TableStyle,
 )
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -67,8 +67,12 @@ def styles() -> dict:
                                      leading=18, textColor=ACCENT, alignment=TA_CENTER)
     out["meta"] = ParagraphStyle("meta", fontName="DejaVu", fontSize=10.5,
                                  leading=16, textColor=GREY, alignment=TA_CENTER)
-    out["h1"] = ParagraphStyle("h1", fontName="DejaVu-Bold", fontSize=16, leading=20,
-                               textColor=NAVY, spaceBefore=16, spaceAfter=8)
+    out["h1"] = ParagraphStyle("h1", fontName="DejaVu-Bold", fontSize=17, leading=21,
+                               textColor=NAVY, spaceBefore=6, spaceAfter=2)
+    out["label"] = ParagraphStyle("label", fontName="DejaVu-Bold", fontSize=9.5,
+                                  leading=13, textColor=NAVY)
+    out["value"] = ParagraphStyle("value", fontName="DejaVu", fontSize=9.5,
+                                  leading=13, textColor=colors.black)
     out["h2"] = ParagraphStyle("h2", fontName="DejaVu-Bold", fontSize=12, leading=16,
                                textColor=ACCENT, spaceBefore=10, spaceAfter=4)
     out["body"] = ParagraphStyle("body", fontName="DejaVu", fontSize=10, leading=15,
@@ -119,6 +123,39 @@ def table(rows, widths, header=True):
     return t
 
 
+def section(title):
+    """A section heading with an accent rule, kept with the following content."""
+    return [
+        CondPageBreak(5 * cm),
+        P(title, "h1"),
+        HRFlowable(width="100%", thickness=1.4, color=ACCENT,
+                   spaceBefore=2, spaceAfter=8, lineCap="round"),
+    ]
+
+
+def metadata_card():
+    rows = [
+        ("Author", "Varun Mundada"),
+        ("Roll No.", "24BCS10326"),
+        ("Course", "SST-2028 &nbsp;·&nbsp; HLD101 — Build a Search Typeahead System"),
+        ("Repository", "github.com/milesmoralis2411/hld_assignment"),
+        ("Date", "June 2026"),
+    ]
+    data = [[Paragraph(k, ST["label"]), Paragraph(v, ST["value"])] for k, v in rows]
+    t = Table(data, colWidths=[3.2 * cm, 10.3 * cm], hAlign="CENTER")
+    t.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("BACKGROUND", (0, 0), (0, -1), LIGHT),
+        ("BOX", (0, 0), (-1, -1), 0.8, BORDER),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, BORDER),
+        ("LEFTPADDING", (0, 0), (-1, -1), 9),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 9),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+    return t
+
+
 def code_block(text):
     """A monospace block with a light background panel."""
     para = Preformatted(text, ST["codeblk"])
@@ -134,17 +171,27 @@ def code_block(text):
     return t
 
 
-def image(name, max_w=15.5 * cm, caption=None):
+def image(name, max_w=14 * cm, caption=None):
+    """A centered, thin-framed screenshot with an optional caption (atomic)."""
     path = os.path.join(IMAGES, name)
     if not os.path.exists(path):
-        return Paragraph(f"[missing image: {name}]", ST["caption"])
+        return [Paragraph(f"[missing image: {name}]", ST["caption"])]
     iw, ih = ImageReader(path).getSize()
     w = max_w
     h = w * ih / iw
-    flow = [Image(path, width=w, height=h)]
+    framed = Table([[Image(path, width=w, height=h)]], hAlign="CENTER")
+    framed.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 0.8, BORDER),
+        ("LEFTPADDING", (0, 0), (-1, -1), 2),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 2),
+        ("TOPPADDING", (0, 0), (-1, -1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    flow = [Spacer(1, 0.2 * cm), framed]
     if caption:
         flow.append(P(caption, "caption"))
-    return flow
+    flow.append(Spacer(1, 0.2 * cm))
+    return [KeepTogether(flow)]
 
 
 ARCH = r"""                            +------------------------------------------+
@@ -170,25 +217,23 @@ ARCH = r"""                            +----------------------------------------
 def build_story():
     story = []
 
-    # ---------- title page ----------
-    story.append(Spacer(1, 4 * cm))
+    # ---------- title page (cover bands are drawn in cover()) ----------
+    story.append(Spacer(1, 5.2 * cm))
     story.append(P("Search Typeahead System", "title"))
-    story.append(Spacer(1, 0.3 * cm))
+    story.append(Spacer(1, 0.35 * cm))
     story.append(P("Project Report", "subtitle"))
-    story.append(Spacer(1, 1.2 * cm))
-    story.append(P("SST-2028 &nbsp; HLD101 Assignment: Build a Search Typeahead System", "meta"))
-    story.append(Spacer(1, 0.6 * cm))
-    story.append(P("A backend-focused typeahead: Trie index, consistent-hashed distributed "
-                   "cache, recency-aware trending, and batched writes.", "meta"))
-    story.append(Spacer(1, 1.6 * cm))
-    story.append(P("<b>Author:</b> Varun Mundada", "meta"))
-    story.append(P('<b>Repository:</b> '
-                   '<font color="#6c7bff">github.com/milesmoralis2411/hld_assignment</font>', "meta"))
-    story.append(P("<b>Date:</b> June 2026", "meta"))
+    story.append(Spacer(1, 0.35 * cm))
+    story.append(HRFlowable(width="32%", thickness=2, color=ACCENT, hAlign="CENTER",
+                            spaceBefore=2, spaceAfter=10, lineCap="round"))
+    story.append(P("A backend-focused typeahead system: a Trie suggestion index, a "
+                   "consistent-hashed distributed cache, recency-aware trending, and "
+                   "batched writes.", "meta"))
+    story.append(Spacer(1, 2.0 * cm))
+    story.append(metadata_card())
     story.append(PageBreak())
 
     # ---------- 1. Architecture ----------
-    story.append(P("1. Architecture", "h1"))
+    story.extend(section("1. Architecture"))
     story.append(P(
         "The system is a search-as-you-type backend with a thin web UI. Suggestions are "
         "served from an in-memory <b>Trie</b> index fronted by a <b>distributed cache</b> "
@@ -197,7 +242,7 @@ def build_story():
         "in <b>batches</b> to a durable <b>SQLite</b> primary store, which is also the source "
         "the Trie is built from. This keeps reads fast and shields the database from per-search "
         "write pressure."))
-    story.append(code_block(ARCH))
+    story.append(KeepTogether(code_block(ARCH)))
     story.append(P("Data-flow paths", "h2"))
     story.extend(bullets([
         "<b>Read</b> (GET /suggest): cache &rarr; on miss, the Trie returns a candidate pool "
@@ -222,13 +267,11 @@ def build_story():
         ["service.py", "Wires it together (read / write / flush / trending / metrics)."],
         ["main.py", "FastAPI routes + lifespan bootstrap + static frontend."],
     ], widths=[4.2 * cm, 12.8 * cm]))
-    story.append(Spacer(1, 0.3 * cm))
     story.extend(image("typeahead.png", caption="The running UI: typeahead suggestions, live "
                        "metrics and consistent-hash cache routing."))
-    story.append(PageBreak())
 
     # ---------- 2. Dataset ----------
-    story.append(P("2. Dataset source and loading instructions", "h1"))
+    story.extend(section("2. Dataset source and loading instructions"))
     story.append(P("Source (real, open)", "h2"))
     story.append(P(
         "The <b>Google Web Trillion Word Corpus</b> unigram counts &mdash; "
@@ -264,10 +307,8 @@ def build_story():
         "If the download cannot reach the network on first run, the app falls back to a "
         "reproducible synthetic generator so it still runs (a message is printed).",
     ]))
-    story.append(PageBreak())
-
     # ---------- 3. API documentation ----------
-    story.append(P("3. API documentation", "h1"))
+    story.extend(section("3. API documentation"))
     story.append(P("Base URL <font name='DejaVuMono'>http://127.0.0.1:8000</font>. Interactive, "
                    "auto-generated docs are also served at "
                    "<font name='DejaVuMono'>/docs</font> (Swagger UI)."))
@@ -308,10 +349,8 @@ def build_story():
     story.append(P("<font name='DejaVuMono'>GET /trending</font>", "body"))
     story.append(code_block(
         '{"trending": [{"query": "python", "recency_score": 12.5, "count": 17610578}]}'))
-    story.append(PageBreak())
-
     # ---------- 4. Design choices ----------
-    story.append(P("4. Design choices and trade-offs", "h1"))
+    story.extend(section("4. Design choices and trade-offs"))
 
     story.append(P("In-memory Trie with bounded precomputation", "h2"))
     story.append(P(
@@ -364,10 +403,8 @@ def build_story():
         "single-row upserts in a transaction on flush) maps cleanly onto any RDBMS, and the "
         "cache layer onto Redis, if scaled out. All tunables live in "
         "<font name='DejaVuMono'>app/config.py</font> (overridable via environment variables)."))
-    story.append(PageBreak())
-
     # ---------- 5. Performance ----------
-    story.append(P("5. Performance report", "h1"))
+    story.extend(section("5. Performance report"))
     story.append(P("Methodology", "h2"))
     story.append(P(
         "Driven over HTTP by <font name='DejaVuMono'>scripts/benchmark.py</font>: first 3,000 "
@@ -377,30 +414,34 @@ def build_story():
         "(806k Trie nodes). Numbers below are a sample local run (Windows 11, Python 3.12) and "
         "vary by machine."))
 
-    story.append(P("Suggestion read latency", "h2"))
-    story.append(table([
-        ["Metric", "Client-measured (incl. HTTP)", "Server-side (engine)"],
-        ["p50", "32.90 ms", "0.036 ms"],
-        ["p95", "37.43 ms", "0.057 ms"],
-        ["p99", "41.67 ms", "0.111 ms"],
-        ["avg", "33.02 ms", "0.036 ms"],
-        ["max", "136.43 ms", "0.545 ms"],
-    ], widths=[4 * cm, 6.5 * cm, 6.5 * cm]))
+    story.append(KeepTogether([
+        P("Suggestion read latency", "h2"),
+        table([
+            ["Metric", "Client-measured (incl. HTTP)", "Server-side (engine)"],
+            ["p50", "32.90 ms", "0.036 ms"],
+            ["p95", "37.43 ms", "0.057 ms"],
+            ["p99", "41.67 ms", "0.111 ms"],
+            ["avg", "33.02 ms", "0.036 ms"],
+            ["max", "136.43 ms", "0.545 ms"],
+        ], widths=[4 * cm, 6.5 * cm, 6.5 * cm]),
+    ]))
     story.append(P("Server-side latency excludes HTTP/loopback/threading overhead, so it is the "
                    "truest measure of the engine: <b>p95 &asymp; 0.06 ms</b> over a 333k-keyword "
                    "index. Client figures are dominated by the Python loopback round-trip under "
                    "16 threads, not the engine.", "body"))
 
-    story.append(P("Distributed cache, database and write reduction", "h2"))
-    story.append(table([
-        ["Area", "Result"],
-        ["Cache hit rate", "99.29% (5,464 hits / 39 misses across 4 nodes)"],
-        ["Cache key spread", "cache-0: 1981 &middot; cache-1: 1483 &middot; cache-2: 1088 &middot; cache-3: 912"],
-        ["DB reads / writes", "14 reads / 121 writes (despite 5,000 reads + 3,000 searches)"],
-        ["Raw search submissions", "3,015"],
-        ["DB row-writes performed", "121 (writes saved: 2,894)"],
-        ["Write reduction (batching)", "<b>95.99%</b> over 13 flushes"],
-    ], widths=[5.5 * cm, 11.5 * cm]))
+    story.append(KeepTogether([
+        P("Distributed cache, database and write reduction", "h2"),
+        table([
+            ["Area", "Result"],
+            ["Cache hit rate", "99.29% (5,464 hits / 39 misses across 4 nodes)"],
+            ["Cache key spread", "cache-0: 1981 &middot; cache-1: 1483 &middot; cache-2: 1088 &middot; cache-3: 912"],
+            ["DB reads / writes", "14 reads / 121 writes (despite 5,000 reads + 3,000 searches)"],
+            ["Raw search submissions", "3,015"],
+            ["DB row-writes performed", "121 (writes saved: 2,894)"],
+            ["Write reduction (batching)", "<b>95.99%</b> over 13 flushes"],
+        ], widths=[5.5 * cm, 11.5 * cm]),
+    ]))
     story.append(P("The cache + in-memory Trie absorb almost all read traffic (only 14 DB reads), "
                    "and batching collapses ~3,000 submissions into 121 row-writes &mdash; a "
                    "<b>96% reduction</b> in write pressure.", "body"))
@@ -425,10 +466,39 @@ def build_story():
 
 def footer(canvas, doc):
     canvas.saveState()
+    canvas.setStrokeColor(BORDER)
+    canvas.setLineWidth(0.5)
+    canvas.line(2 * cm, 1.5 * cm, A4[0] - 2 * cm, 1.5 * cm)
     canvas.setFont("DejaVu", 8)
     canvas.setFillColor(GREY)
-    canvas.drawString(2 * cm, 1.1 * cm, "Search Typeahead System — Project Report")
-    canvas.drawRightString(A4[0] - 2 * cm, 1.1 * cm, f"Page {doc.page}")
+    canvas.drawString(2 * cm, 1.0 * cm, "Search Typeahead System — Project Report")
+    canvas.drawRightString(A4[0] - 2 * cm, 1.0 * cm, f"Page {doc.page}")
+    canvas.restoreState()
+
+
+def cover(canvas, doc):
+    """Decorative header/footer bands for the title page."""
+    canvas.saveState()
+    w, h = A4
+    # top navy band + accent stripe
+    canvas.setFillColor(NAVY)
+    canvas.rect(0, h - 3.2 * cm, w, 3.2 * cm, fill=1, stroke=0)
+    canvas.setFillColor(ACCENT)
+    canvas.rect(0, h - 3.35 * cm, w, 0.15 * cm, fill=1, stroke=0)
+    canvas.setFillColor(colors.white)
+    canvas.setFont("DejaVu-Bold", 12)
+    canvas.drawString(2 * cm, h - 2.0 * cm, "SST-2028  ·  HLD101")
+    canvas.setFont("DejaVu", 10)
+    canvas.drawRightString(w - 2 * cm, h - 2.0 * cm, "High-Level Design Assignment")
+    # bottom navy band + accent stripe
+    canvas.setFillColor(NAVY)
+    canvas.rect(0, 0, w, 1.6 * cm, fill=1, stroke=0)
+    canvas.setFillColor(ACCENT)
+    canvas.rect(0, 1.6 * cm, w, 0.12 * cm, fill=1, stroke=0)
+    canvas.setFillColor(colors.white)
+    canvas.setFont("DejaVu", 9)
+    canvas.drawCentredString(w / 2, 0.6 * cm,
+                             "github.com/milesmoralis2411/hld_assignment")
     canvas.restoreState()
 
 
@@ -439,9 +509,9 @@ def main():
     doc = SimpleDocTemplate(
         OUT, pagesize=A4, title="Search Typeahead System - Project Report",
         author="Varun Mundada", leftMargin=2 * cm, rightMargin=2 * cm,
-        topMargin=2 * cm, bottomMargin=1.8 * cm,
+        topMargin=2 * cm, bottomMargin=2 * cm,
     )
-    doc.build(build_story(), onFirstPage=lambda c, d: None, onLaterPages=footer)
+    doc.build(build_story(), onFirstPage=cover, onLaterPages=footer)
     print(f"Wrote {OUT}")
 
 
